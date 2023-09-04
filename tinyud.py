@@ -3,6 +3,7 @@ from tinydb import TinyDB, Query
 from ping3 import ping
 from datetime import datetime
 import requests #pip install requests
+from datetime import datetime
 
 # The argparse module makeis it easy to write user-friendly command-line interfaces
 parser = argparse.ArgumentParser()
@@ -10,7 +11,7 @@ parser.add_argument("-a","--add", help="Add a service", action="store_true")
 parser.add_argument("-d","--delete", help="Delete a service", action="store_true")
 parser.add_argument("--name", help="Name of service")
 parser.add_argument("--address", help="Address IP")
-parser.add_argument("--check", help="Number of times the service is detected down before being nortified")
+parser.add_argument("--check", help="Number of times the service is detected down before being notified")
 parser.add_argument("--list", help="List", action="store_true")
 parser.add_argument("--test", help="Test Gotify notification", action="store_true")
 args = parser.parse_args()
@@ -21,16 +22,25 @@ Element = Query()
 
 # Variable
 gotify_url=db.search(Element.nom =="GotifyURL")
-now = datetime.now() # current date and time
-date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
 
 # Function to alert via Gotify
-def alert_gotify(name,state):
-    requests.post(gotify_url[0]["addr"], json={
-    "message": date_time + " : The " + name + " service is "+state,
-    "priority": 2,
-    "title": "Service : "+name+" : "+state
-    })
+def alert_gotify(name,state,lasttime_down):
+    date_time = datetime.fromtimestamp(lasttime_down)
+    if state == "Down":
+        requests.post(gotify_url[0]["addr"], json={
+        "message": "The " + name + " service is "+state + " since : " + date_time.strftime("%d-%m-%Y, %H:%M:%S"),
+        "priority": 2,
+        "title": "Service : "+name+" : "+state
+        })
+    elif state == "Up":
+        now = datetime.now() # current date and time
+        then =datetime.fromtimestamp(lasttime_down)
+        duration = now - then
+        requests.post(gotify_url[0]["addr"], json={
+        "message": "The " + name + " service is "+state + ". Duration : " + str(duration.total_seconds() / 60) + " minutes",
+        "priority": 2,
+        "title": "Service : "+name+" : "+state
+        })        
 
 # Function to check ping3
 def check_ping(addresses):
@@ -51,18 +61,20 @@ def check():
             db.update({'state':'Up'},Element.nom == data["nom"])
             if int(data["attempt_fail"]) >= int(data["check_attempt"]) :
                 print("Notifier de nouveau Up")
-                alert_gotify(data["nom"],"Up")
+                alert_gotify(data["nom"],"Up",data["lasttime_down"])
             db.update({'attempt_fail':'0'},Element.nom == data["nom"])
         elif oldstate == "Up" and newstate == "Down":
             db.update({'state':'Down'},Element.nom == data["nom"])
             db.update({'attempt_fail':'1'},Element.nom == data["nom"])
+            now = datetime.now() # current date and time
+            db.update({'lasttime_down':now.timestamp()},Element.nom == data["nom"])
         elif oldstate == "Down" and newstate == "Down":
             nb_fail=int(data["attempt_fail"])
             nb_fail +=1
             db.update({'attempt_fail':nb_fail},Element.nom == data["nom"])
             if nb_fail == int(data["check_attempt"]):
                 print("Notifier Down")
-                alert_gotify(data["nom"],"Down")
+                alert_gotify(data["nom"],"Down",data["lasttime_down"])
 
 def main():
 

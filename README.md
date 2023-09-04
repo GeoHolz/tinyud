@@ -27,7 +27,7 @@ python3 tinyud.py --add --name Service1 --address 192.168.0.1 --check 5
 ```
 - name : Service name
 - address : Service IP address or FQDN
-- check : Number of times the service is detected down before being nortified
+- check : Number of times the service is detected down before being notified
 
 ### To list all services :
 ```bash
