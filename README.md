@@ -16,21 +16,25 @@ Simply download the tinyud.py file
 
 ## Configuration
 
-First, you need to specify your Gotify address and token in the database ( BDD tinydb.json will be created ) :
+### First, you need to specify your Gotify address and token in the database ( BDD tinydb.json will be created ) :
 ```bash
 python3 tinyud.py --add --name GotifyURL --address https://YOU_URL_TO_GOTIFY/message?token=YOUR_TOKEN
 ```
-Then add your services to be monitored one by one :
-```bash
-python3 tinyud.py --add --name Service1 --address 192.168.0.1
-```
 
-To list all services :
+### Then add your services to be monitored one by one :
+```bash
+python3 tinyud.py --add --name Service1 --address 192.168.0.1 --check 5
+```
+- name : Service name
+- address : Service IP address or FQDN
+- check : Number of times the service is detected down before being nortified
+
+### To list all services :
 ```bash
 python3 tinyud.py --list
 ```
 
-To delete a service :
+### To delete a service :
 ```bash
 python3 tinyud.py --delete --name Name_Of_Service
 ```

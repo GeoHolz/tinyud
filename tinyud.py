@@ -10,6 +10,7 @@ parser.add_argument("-a","--add", help="Add a service", action="store_true")
 parser.add_argument("-d","--delete", help="Delete a service", action="store_true")
 parser.add_argument("--name", help="Name of service")
 parser.add_argument("--address", help="Address IP")
+parser.add_argument("--check", help="Number of times the service is detected down before being nortified")
 parser.add_argument("--list", help="List", action="store_true")
 parser.add_argument("--test", help="Test Gotify notification", action="store_true")
 args = parser.parse_args()
@@ -48,7 +49,7 @@ def check():
         # print(data["nom"])
         if oldstate == "Down" and newstate == "Up" :
             db.update({'state':'Up'},Element.nom == data["nom"])
-            if int(data["attempt_fail"]) >= 5 :
+            if int(data["attempt_fail"]) >= int(data["check_attempt"]) :
                 print("Notifier de nouveau Up")
                 alert_gotify(data["nom"],"Up")
             db.update({'attempt_fail':'0'},Element.nom == data["nom"])
@@ -59,13 +60,13 @@ def check():
             nb_fail=int(data["attempt_fail"])
             nb_fail +=1
             db.update({'attempt_fail':nb_fail},Element.nom == data["nom"])
-            if nb_fail == 5:
+            if nb_fail == int(data["check_attempt"]):
                 print("Notifier Down")
                 alert_gotify(data["nom"],"Down")
 
 def main():
 
-    if args.add and (args.name is None or args.address is None):
+    if args.add and (args.name is None or args.address is None or args.check_attempt is None):
         parser.error('--add requires --name and --address')
     if args.delete and (args.name is None ):
         parser.error('--delete requires --name')
