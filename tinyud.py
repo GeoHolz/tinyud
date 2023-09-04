@@ -79,7 +79,7 @@ def check():
 def main():
 
     if args.add and (args.name is None or args.address is None or args.check_attempt is None):
-        parser.error('--add requires --name and --address')
+        parser.error('--add requires --name, --address and --check')
     if args.delete and (args.name is None ):
         parser.error('--delete requires --name')
 
@@ -92,7 +92,7 @@ def main():
             print(data)
 
     if args.add:
-        db.insert({'nom': args.name,'addr':args.address,'state':'Up','attempt_fail':'0','lasttime_down':'0'})
+        db.insert({'nom': args.name,'addr':args.address,'state':'Up','attempt_fail':'0','lasttime_down':'0','check_attempt':args.check})
 
     if args.delete:
         db.remove(Element.nom == args.name)
