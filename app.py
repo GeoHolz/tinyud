@@ -17,6 +17,13 @@ def get_post(post_id):
     if post is None:
         abort(404)
     return post
+def get_settings():
+    conn = get_db_connection()
+    post = conn.execute('SELECT config FROM tinyud_config WHERE name ="GotifyURL" ').fetchone()
+    conn.close()
+    if post is None:
+        abort(404)
+    return post[0] 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your secret key'
 @app.template_filter('ctime')
@@ -50,6 +57,25 @@ def create():
             return redirect(url_for('index'))
     
     return render_template('create.html')
+
+@app.route('/settings', methods=('GET', 'POST'))
+def settings():
+    settings=get_settings()
+    
+    if request.method == 'POST':
+        Gotify = request.form['Gotify']
+        if not Gotify:
+            flash('Gotify URL is required!')
+        else:
+            conn = get_db_connection()
+            conn.execute('INSERT INTO tinyud_config (name ,config) VALUES ("GotifyURL",?)',(Gotify,))
+            conn.commit()
+            conn.close()
+            flash('"{}" was successfully added!'.format(Gotify))
+            return redirect(url_for('index'))
+    
+    return render_template('settings.html', settings=settings)
+
 
 @app.route('/<int:id>/edit', methods=('GET', 'POST'))
 def edit(id):

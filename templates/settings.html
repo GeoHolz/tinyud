@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="col-lg-auto">
+    <div class="card shadow mb-auto">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">{% block title %} Settings {% endblock %}</h6>
+        </div>
+        <div class="card-body">
+
+
+<form method="post">
+    <div class="form-group">
+        <label for="title">Gotify URL</label>
+        <input type="text" name="settings"
+               placeholder="Post Gotify" class="form-control"
+               value="{{ request.form['settings'] or settings }}"></input>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+</div>
+{% endblock %}
