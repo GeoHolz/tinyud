@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}
+Tiny Up&Down status page
+{% endblock %}
+{% block content %}
+
+<div class="col-lg-auto">
+    <div class="card shadow mb-auto">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tiny Up&Down Status Page</h6>
+        </div>
+        <div class="card-body">
+
+
+<table class="table w-auto table-bordered table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">IP Address</th>
+        <th scope="col">State</th>
+        <th scope="col">Failed</th>
+        <th scope="col">Last Time Down</th>
+        <th scope="col">Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for post in posts %}
+    
+
+          <tr>
+            <th scope="row">{{ post['id'] }}</th>
+            <td>{{ post['nom'] }}</td>
+            <td>{{ post['addr'] }}</td>
+            <td> {% if post['state'] == 'Up' %}
+                    <label class="badge badge-success">{{ post['state'] }}</label>
+                {% else %}
+                    <label class="badge badge-danger">{{ post['state'] }}</label>
+                {% endif %}</td>
+            <td>
+                {% if post['attempt_fail'] == 0 %}               
+                    {{ post['attempt_fail'] }} / {{ post['check_attempt'] }} 
+                {% elif  post['attempt_fail'] < post['check_attempt'] %}
+                    <label class="badge badge-warning">{{ post['attempt_fail'] }}</label> / {{ post['check_attempt'] }} 
+                {% else %}
+                    <label class="badge badge-danger">{{ post['attempt_fail'] }}</label> / {{ post['check_attempt'] }} 
+                {% endif %} 
+                    
+            </td>
+            <td>{% if post['lasttime_down'] != 0 %}
+                    {{ post['lasttime_down'] | ctime }}</td>
+                {% else %}
+                    Never
+                {% endif %}</td>
+            <td>        <span class="badge badge-primary">{{ post['created'] }}</span>
+                <a href="{{ url_for('edit', id=post['id']) }}">
+                    <span class="badge badge-info">Edit</span></a></td>
+          </tr>
+
+
+   
+{% endfor %}
+</div>
+</div>
+</tbody>
+</table>
+</div>
+{% endblock %}
