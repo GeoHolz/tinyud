@@ -1,4 +1,4 @@
-FROM     python
+FROM     python:slim
 WORKDIR  /app
 COPY     ./app.py       ./
 COPY     ./wsgi.py      ./
