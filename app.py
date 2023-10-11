@@ -3,10 +3,19 @@ import time
 from flask import Flask, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
 from dotenv import load_dotenv
+import tinyud
 load_dotenv()
 
+from flask_apscheduler import APScheduler
+scheduler = APScheduler()
+@scheduler.task('cron', id='do_job_2', minute='*')
+def job2():
+    tinyud.check()
+scheduler.start() 
+
+
 def get_db_connection():
-    conn = sqlite3.connect('tinyud.db')
+    conn = sqlite3.connect('/app/db/tinyud.db')
     conn.row_factory = sqlite3.Row
     return conn
 def get_post(post_id):
@@ -22,8 +31,9 @@ def get_settings():
     post = conn.execute('SELECT config FROM tinyud_config WHERE name ="GotifyURL" ').fetchone()
     conn.close()
     if post is None:
-        abort(404)
-    return post[0] 
+        return ""
+    else:
+        return post[0]
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your secret key'
 @app.template_filter('ctime')
@@ -63,12 +73,12 @@ def settings():
     settings=get_settings()
     
     if request.method == 'POST':
-        Gotify = request.form['Gotify']
+        Gotify = request.form['settings']
         if not Gotify:
             flash('Gotify URL is required!')
         else:
             conn = get_db_connection()
-            conn.execute('INSERT INTO tinyud_config (name ,config) VALUES ("GotifyURL",?)',(Gotify,))
+            conn.execute('UPDATE tinyud_config SET config = ? WHERE name = ?',(Gotify,"GotifyURL"))
             conn.commit()
             conn.close()
             flash('"{}" was successfully added!'.format(Gotify))
@@ -106,4 +116,9 @@ def delete(id):
     conn.commit()
     conn.close()
     flash('"{}" was successfully deleted!'.format(post['nom']))
+    return redirect(url_for('index'))
+
+@app.route('/test_notify')
+def test_notify():
+    tinyud.alert_gotify("Test","Up",1696938843)
     return redirect(url_for('index'))

@@ -5,31 +5,18 @@ import requests #pip install requests
 from datetime import datetime
 import sqlite3
 
-# The argparse module makeis it easy to write user-friendly command-line interfaces
-parser = argparse.ArgumentParser()
-parser.add_argument("-a","--add", help="Add a service", action="store_true")
-parser.add_argument("-d","--delete", help="Delete a service", action="store_true")
-parser.add_argument("--name", help="Name of service")
-parser.add_argument("--address", help="Address IP")
-parser.add_argument("--checktimes", help="Number of times the service is detected down before being notified")
-parser.add_argument("--list", help="List", action="store_true")
-parser.add_argument("--test", help="Test Gotify notification", action="store_true")
-parser.add_argument("--gotify", help="Add Gotify URL")
-args = parser.parse_args()
 
 
-def get_db_connection():
+
+def get_db():
     # SQLite3
-    database = sqlite3.connect('tinyud.db')
-    database.execute('CREATE TABLE IF NOT EXISTS tinyud (	id INTEGER PRIMARY KEY ,	nom VARCHAR(100),	addr VARCHAR(100),	state VARCHAR(10),	attempt_fail INT(5),	lasttime_down FLOAT(100),check_attempt INT(5));')
-    database.execute('CREATE TABLE IF NOT EXISTS tinyud_config (id INTEGER PRIMARY KEY ,	name VARCHAR(100),	config VARCHAR(100))')
-    
+    database = sqlite3.connect('/app/db/tinyud.db')
     return database
 
 
 # Function to alert via Gotify
 def alert_gotify(name,state,lasttime_down):
-    database=get_db_connection()
+    database=get_db()
     cursor=database.cursor()
     cursor.execute("SELECT config FROM tinyud_config WHERE name='GotifyURL'")
     gotify_url=cursor.fetchone()[0]
@@ -53,14 +40,14 @@ def alert_gotify(name,state,lasttime_down):
 
 # Function to check ping3
 def check_ping(addresses):
-    
-    if ping(addresses) is None:
+    result=ping(addresses)
+    if result is None or result is False:
         return "Down"
     else:
         return "Up"
 # Check principal function
 def check():
-    database=get_db_connection()
+    database=get_db()
     cursor=database.cursor()
     cursor.execute("SELECT * FROM tinyud")
     result=cursor.fetchall()
@@ -95,57 +82,3 @@ def check():
                 alert_gotify(data[1],"Down",data[5])
     database.commit()
     database.close()
-
-def main():
-
-    if args.add and (args.name is None or args.address is None or args.checktimes is None):
-        parser.error('--add requires --name, --address and --check')
-    if args.delete and (args.name is None ):
-        parser.error('--delete requires --name')
-
-    #For Debug     
-    #print("args=%s" % args)
-
-
-    if args.list:
-        #for data in db:
-            #print(data)
-        database=get_db_connection()
-        for row in database.execute('SELECT * FROM tinyud'):
-            print(row)
-        database.close()
-
-    if args.add:
-       # db.insert({'nom': args.name,'addr':args.address,'state':'Up','attempt_fail':'0','lasttime_down':'0','check_attempt':args.check})
-        database=get_db_connection()
-        database.execute("""
-                         INSERT INTO tinyud (nom ,addr ,state ,attempt_fail ,lasttime_down , check_attempt )
-                         VALUES (?,?,"Up",0,0,?);""",
-                         (args.name,args.address,args.checktimes))
-        database.commit()
-        database.close()
-    if args.delete:
-        database=get_db_connection()
-        #db.remove(Element.nom == args.name)
-        database.execute("""DELETE FROM tinyud WHERE nom=?""",(args.name,))
-        database.commit()
-        database.close()
-    if args.test:
-        database=get_db_connection()
-        now = datetime.now()
-        alert_gotify("Test","Up",now.timestamp())
-        database.close()
-    if args.gotify:
-        database=get_db_connection()
-        database.execute("""
-                         INSERT INTO tinyud_config (name ,config)
-                         VALUES ('GotifyURL',?);""",
-                         (args.gotify,))
-        database.commit()
-        database.close()
-    if not any(vars(args).values()):
-        check()
-
-    
-if __name__ == "__main__":
-    main()

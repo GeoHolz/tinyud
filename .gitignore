@@ -6,3 +6,5 @@ tinyud.code-workspace
 __pycache**/*
 tinyud.db
 .env
+build-dockerfile.txt
+tinyudARG.py

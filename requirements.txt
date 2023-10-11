@@ -1,0 +1,6 @@
+flask
+gunicorn
+ping3
+python-dotenv
+requests
+Flask-APScheduler
