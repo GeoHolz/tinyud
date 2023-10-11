@@ -12,4 +12,4 @@ RUN     pip install --upgrade pip --no-cache-dir
 RUN     pip install -r ./requirements.txt --no-cache-dir
 RUN	    mkdir /app/db
 RUN     python3 /app/initdb.py
-CMD     ["gunicorn","-w", "4","wsgi:app","--bind", "0.0.0.0:8765"]
+CMD     ["gunicorn","-w", "1","wsgi:app","--bind", "0.0.0.0:8765"]
