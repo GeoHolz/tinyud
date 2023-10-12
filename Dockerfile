@@ -4,7 +4,6 @@ COPY     ./app.py       ./
 COPY     ./wsgi.py      ./
 COPY     ./tinyud.py    ./
 COPY 	 ./initdb.py 	./
-COPY     images ./images
 COPY     static ./static
 COPY     templates ./templates
 COPY    ./requirements.txt              ./

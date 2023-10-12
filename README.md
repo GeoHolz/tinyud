@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="images/tinyud.png" />
+  <img src="static/images/tinyud.png" />
 </p>
 
 # tinyud
 
 Tiny Up & Down is a simple python program that alerts you via Gotify when a host is unavailable.
 <p align="center">
-  <img src="images/example.jpg" width="25%" >
+  <img src="static/images/example.jpg" width="25%" >
 </p>
 
 ## Installation
@@ -25,12 +25,12 @@ Tiny Up & Down is a simple python program that alerts you via Gotify when a host
 
 ### First, you need to specify your Gotify address and token in the database via settings page :
 <p align="center">
-  <img src="images/settings.png" width="25%" >
+  <img src="static/images/settings.png" width="25%" >
 </p>
 
 ### Then add your services to be monitored one by one :
 <p align="center">
-  <img src="images/add.png" width="25%" >
+  <img src="static/images/add.png" width="25%" >
 </p>
 
 
